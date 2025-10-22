@@ -37,7 +37,7 @@ const locais = ["São José Operário 2", "Jorge Teixeira", "Cidade Nova", "Japi
       </ul>
       <div className="ansolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-gray-50">
         <p className="text-xs text-slate-500 text-center">
-            SALVA ÍNDIO
+            CLIMATECH
         </p>
       </div>
     </aside>
