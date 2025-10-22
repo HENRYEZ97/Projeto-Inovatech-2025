@@ -29,7 +29,7 @@ export default function WeatherItem({
   return (
     <div 
       className={`
-        flex justify-between w-80 items-center 
+        flex justify-between w-100 items-center 
         rounded-xl border-2 
         transition-all duration-200 
         hover:shadow-md hover:scale-[1.02]

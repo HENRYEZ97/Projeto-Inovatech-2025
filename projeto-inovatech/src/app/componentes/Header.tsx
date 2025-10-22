@@ -13,7 +13,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
            >
           <Menu size={28} />
         </button>
-      <h1 className="text-2x1 text-slate-500 cursor-pointer">CLIMATECH</h1>     
+      <h1 className="text-2x1 font-bold text-slate-500 cursor-pointer">CLIMATECH</h1>     
     </header>
   );
 }

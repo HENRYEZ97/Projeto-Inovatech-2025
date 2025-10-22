@@ -41,10 +41,10 @@ export default function WeatherInfo() {
     <div className="bg-white p-6 rounded-2xl shadow-xl border border-gray-200 max-w-md mx-auto">
       {/* Header com cidade e status */}
       <div className="text-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">
+        <h1 className="text-2xl font-bold text-gray-600 mb-2">
           {weatherData.bairro}
         </h1>
-        <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${
+        <div className={`inline-flex bg-green-200 cursor-pointer items-center gap-2 px-4 py-2 rounded-full ${
           weatherData.status === 'normal' ? 'bg-green-100 text-green-800' :
           weatherData.status === 'alerta' ? 'bg-yellow-100 text-yellow-800' :
           'bg-red-100 text-red-800'
@@ -88,7 +88,7 @@ export default function WeatherInfo() {
       </div>
 
       {/* Footer com timestamp */}
-      <div className="mt-6 pt-4 border-t border-gray-200">
+      <div className="mt-6 pt-4 border-t border-gray-200 cursor-pointer">
         <p className="text-xs text-gray-500 text-center">
           Atualizado em: {new Date().toLocaleString('pt-BR')}
         </p>
