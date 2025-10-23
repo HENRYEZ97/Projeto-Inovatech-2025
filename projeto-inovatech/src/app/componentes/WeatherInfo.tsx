@@ -1,26 +1,10 @@
+'use client';
+import { useWeather } from '../componentes/WeatherContext';
 import WeatherItem from "./WeatherItem";
 
-interface WeatherData {
-  bairro: string;
-  temperatura: number;
-  condicao: string;
-  chuva: string;
-  nivelAgua: string;
-  status: 'normal' | 'alerta' | 'emergencia';
-}
-
 export default function WeatherInfo() {
-  // Dados mockados - depois vem da API
-  const weatherData: WeatherData = {
-    bairro: "São José Operário 2",
-    temperatura: 31,
-    condicao: "Ensolarado",
-    chuva: "0%",
-    nivelAgua: "12.4m",
-    status: "normal"
-  };
+  const { weatherData, isLoading } = useWeather();
 
-  // Determina o variant baseado no status
   const getStatusVariant = (): 'default' | 'warning' | 'danger' => {
     switch(weatherData.status) {
       case 'alerta': return 'warning';
@@ -31,11 +15,22 @@ export default function WeatherInfo() {
 
   const getStatusMessage = (): string => {
     switch(weatherData.status) {
-      case 'alerta': return 'Alerta Preventivo';
+      case 'alerta': return '⚠️ Alerta Preventivo';
       case 'emergencia': return '🚨 EVACUAR ÁREA!';
-      default: return 'Situação Normal';
+      default: return '✅ Situação Normal';
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[80vh]">
+        <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-200 max-w-md mx-auto text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Conectando com sensores...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white p-6 rounded-2xl shadow-xl border border-gray-200 max-w-md mx-auto">
@@ -44,7 +39,7 @@ export default function WeatherInfo() {
         <h1 className="text-2xl font-bold text-gray-600 mb-2">
           {weatherData.bairro}
         </h1>
-        <div className={`inline-flex bg-green-200 cursor-pointer items-center gap-2 px-4 py-2 rounded-full ${
+        <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${
           weatherData.status === 'normal' ? 'bg-green-100 text-green-800' :
           weatherData.status === 'alerta' ? 'bg-yellow-100 text-yellow-800' :
           'bg-red-100 text-red-800'
@@ -56,7 +51,7 @@ export default function WeatherInfo() {
       </div>
 
       {/* Grid de informações meteorológicas */}
-      <div className="space-y-3 cursor-pointer">
+      <div className="cursor-pointer space-y-3">
         <WeatherItem 
           icon="🌡️" 
           label="Temperatura" 
@@ -88,9 +83,12 @@ export default function WeatherInfo() {
       </div>
 
       {/* Footer com timestamp */}
-      <div className="mt-6 pt-4 border-t border-gray-200 cursor-pointer">
+      <div className="mt-6 pt-4 border-t border-gray-200">
         <p className="text-xs text-gray-500 text-center">
           Atualizado em: {new Date().toLocaleString('pt-BR')}
+        </p>
+        <p className="text-xs text-blue-500 text-center mt-1">
+          ⚡ Dados em tempo real do Arduino
         </p>
       </div>
     </div>
