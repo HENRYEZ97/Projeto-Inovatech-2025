@@ -34,7 +34,7 @@ export default function WeatherInfo() {
 
   return (
     <div className="bg-white p-6 rounded-2xl shadow-xl border border-gray-200 max-w-md mx-auto">
-      {/* Header com cidade e status */}
+      {/* Header com bairro e status */}
       <div className="text-center mb-6">
         <h1 className="text-2xl font-bold text-gray-600 mb-2">
           {weatherData.bairro}

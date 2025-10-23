@@ -41,7 +41,7 @@ export function WeatherProvider({ children }: WeatherProviderProps) {
     const fetchDataFromArduino = async () => {
       setIsLoading(true);
       try {
-        // ✅ AQUI VOCÊ VAI CONECTAR COM SEU ARDUINO
+        // NESTA FUNÇÃO PODEMOS FAZER A CONEXÃO COM O ARDUÍNO
         const simulatedData: WeatherData = {
           bairro: selectedLocation,
           temperatura: Math.floor(Math.random() * 15) + 20,

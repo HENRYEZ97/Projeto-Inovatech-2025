@@ -13,7 +13,6 @@ export default function WeatherItem({
   variant = 'default',
   size = 'md'
 }: WeatherItemProps) {
-  // Sistema de variants profissional
   const variantStyles = {
     default: 'bg-blue-50 border-blue-200 text-blue-900',
     warning: 'bg-yellow-50 border-yellow-300 text-yellow-800',
