@@ -1,95 +1,50 @@
-'use client';
-import { useWeather } from '../componentes/WeatherContext';
+// components/WeatherInfo.tsx
+"use client";
+import { useWeather } from "./WeatherContext";
 import WeatherItem from "./WeatherItem";
 
 export default function WeatherInfo() {
   const { weatherData, isLoading } = useWeather();
 
-  const getStatusVariant = (): 'default' | 'warning' | 'danger' => {
-    switch(weatherData.status) {
-      case 'alerta': return 'warning';
-      case 'emergencia': return 'danger';
-      default: return 'default';
-    }
-  };
-
-  const getStatusMessage = (): string => {
-    switch(weatherData.status) {
-      case 'alerta': return '⚠️ Alerta Preventivo';
-      case 'emergencia': return '🚨 EVACUAR ÁREA!';
-      default: return '✅ Situação Normal';
-    }
-  };
-
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-[80vh]">
+      <div className="flex justify-center items-center min-h-[60vh]">
         <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-200 max-w-md mx-auto text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Conectando com sensores...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Conectando com os sensores...</p>
         </div>
       </div>
     );
   }
 
+  const statusVariant =
+    weatherData.status === "normal" ? "default" :
+    weatherData.status === "alerta" ? "warning" : "danger";
+
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-xl border border-gray-200 max-w-md mx-auto">
-      {/* Header com bairro e status */}
-      <div className="text-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-600 mb-2">
-          {weatherData.bairro}
-        </h1>
-        <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${
-          weatherData.status === 'normal' ? 'bg-green-100 text-green-800' :
-          weatherData.status === 'alerta' ? 'bg-yellow-100 text-yellow-800' :
-          'bg-red-100 text-red-800'
+    <div className="flex cursor-pointer text-center">
+      <div className="bg-white p-6 rounded-2xl shadow-xl border border-gray-200">
+        <h2 className="text-xl font-bold text-slate-700 mb-3 text-center">{weatherData.bairro}</h2>
+        <div className={`inline-flex items-center gap-2 px-3 py-2 rounded-full ${
+          weatherData.status === 'normal' ? 'bg-emerald-50 text-emerald-800' :
+          weatherData.status === 'alerta' ? 'bg-yellow-50 text-yellow-800' :
+          'bg-red-50 text-red-800'
         }`}>
-          <span className="text-sm font-semibold">
-            {getStatusMessage()}
+          <span className="text-center font-semibold">
+            {weatherData.status === 'normal' ? '✅ Situação Normal' :
+             weatherData.status === 'alerta' ? '⚠️ Alerta' : '🚨 Emergência'}
           </span>
         </div>
-      </div>
 
-      {/* Grid de informações meteorológicas */}
-      <div className="cursor-pointer space-y-3">
-        <WeatherItem 
-          icon="🌡️" 
-          label="Temperatura" 
-          value={`${weatherData.temperatura}°C`}
-          size="md"
-        />
-        
-        <WeatherItem 
-          icon="🌤️" 
-          label="Condição" 
-          value={weatherData.condicao}
-          size="md"
-        />
-        
-        <WeatherItem 
-          icon="🌧️" 
-          label="Precipitação" 
-          value={weatherData.chuva}
-          size="md"
-        />
-        
-        <WeatherItem 
-          icon="🌊" 
-          label="Nível do rio" 
-          value={weatherData.nivelAgua}
-          variant={getStatusVariant()}
-          size="md"
-        />
-      </div>
+        <div className="mt-6 space-y-3 w-100">
+          <WeatherItem icon="🌡️" label="Temperatura" value={`${weatherData.temperatura.toFixed(1)}°C`} />
+          <WeatherItem icon="💧" label="Umidade" value={`${weatherData.umidade.toFixed(1)}%`} />
+          <WeatherItem icon="🌊" label="Nível do rio" value={`${weatherData.nivelAgua.toFixed(1)} cm`} />
+        </div>
 
-      {/* Footer com timestamp */}
-      <div className="mt-6 pt-4 border-t border-gray-200">
-        <p className="text-xs text-gray-500 text-center">
-          Atualizado em: {new Date().toLocaleString('pt-BR')}
-        </p>
-        <p className="text-xs text-blue-500 text-center mt-1">
-          ⚡ Dados em tempo real do Arduino
-        </p>
+        <div className="mt-6 pt-4 border-t border-gray-100 text-sm text-gray-500">
+          Atualizado em: <span className="font-medium">{new Date().toLocaleString('pt-BR')}</span>
+        </div>
       </div>
     </div>
   );

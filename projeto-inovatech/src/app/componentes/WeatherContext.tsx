@@ -1,59 +1,70 @@
-'use client';
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import ioClient from 'socket.io-client'; // Import default, não destruturado
+// components/WeatherContext.tsx
+"use client";
+import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import  io  from "socket.io-client";
+type SocketType = ReturnType<typeof io>;
+
 
 interface WeatherData {
   bairro: string;
   temperatura: number;
-  condicao: string;
-  chuva: string;
-  nivelAgua: string;
-  status: 'normal' | 'alerta' | 'emergencia';
+  umidade: number;
+  nivelAgua: number;
+  status: "normal" | "alerta" | "emergencia";
 }
 
-interface WeatherContextType {
+interface ContextType {
   weatherData: WeatherData;
-  setSelectedLocation: (loc: string) => void;
-  selectedLocation: string;
   isLoading: boolean;
+  selectedLocation: string;
+  setSelectedLocation: (loc: string) => void;
 }
 
-const WeatherContext = createContext<WeatherContextType | undefined>(undefined);
+const defaultData: WeatherData = {
+  bairro: "São José Operário 2",
+  temperatura: 0,
+  umidade: 0,
+  nivelAgua: 0,
+  status: "normal"
+};
 
-// Cria socket do lado do cliente
-const socket = ioClient("http://localhost:4000");
+const WeatherContext = createContext<ContextType | undefined>(undefined);
+
+const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:4000";
+let socket: SocketType | null = null;
+
 
 export function WeatherProvider({ children }: { children: ReactNode }) {
-  const [selectedLocation, setSelectedLocation] = useState("São José Operário 2");
-  const [weatherData, setWeatherData] = useState<WeatherData>({
-    bairro: "São José Operário 2",
-    temperatura: 0,
-    condicao: "Carregando...",
-    chuva: "0%",
-    nivelAgua: "0m",
-    status: "normal"
-  });
+  const [weatherData, setWeatherData] = useState<WeatherData>(defaultData);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedLocation, setSelectedLocation] = useState("São José Operário 2");
 
   useEffect(() => {
-    // Conecta ao backend
-    socket.on("connect", () => console.log("🔌 Conectado ao backend", socket.id));
+    if (!socket) {
+      socket = io(SOCKET_URL);
+    }
 
-    // Recebe dados em tempo real
-    socket.on("climaAtualizado", (dados: Record<string, WeatherData>) => {
-      const clima = dados[selectedLocation];
-      if (clima) setWeatherData(clima);
-      setIsLoading(false);
+    socket.on("connect", () => {
+      console.log("⚡ conectado ao socket:", socket?.id);
     });
 
+    socket.on("climaAtualizado", (dados: Record<string, WeatherData>) => {
+      const local = dados[selectedLocation] || Object.values(dados)[0];
+      if (local) {
+        setWeatherData(local);
+        setIsLoading(false);
+      }
+    });
+
+    // request initial state (server already emits on connect)
     return () => {
-      socket.off("climaAtualizado");
-      socket.off("connect");
+      socket?.off("climaAtualizado");
+      socket?.off("connect");
     };
   }, [selectedLocation]);
 
   return (
-    <WeatherContext.Provider value={{ weatherData, setSelectedLocation, selectedLocation, isLoading }}>
+    <WeatherContext.Provider value={{ weatherData, isLoading, selectedLocation, setSelectedLocation }}>
       {children}
     </WeatherContext.Provider>
   );

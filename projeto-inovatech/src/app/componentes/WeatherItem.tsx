@@ -1,50 +1,21 @@
-interface WeatherItemProps {
+// components/WeatherItem.tsx
+"use client";
+interface Props {
   icon: string;
   label: string;
   value: string | number;
-  variant?: 'default' | 'warning' | 'danger';
-  size?: 'sm' | 'md' | 'lg';
 }
-
-export default function WeatherItem({ 
-  icon, 
-  label, 
-  value, 
-  variant = 'default',
-  size = 'md'
-}: WeatherItemProps) {
-  const variantStyles = {
-    default: 'bg-blue-50 border-blue-200 text-blue-900',
-    warning: 'bg-yellow-50 border-yellow-300 text-yellow-800',
-    danger: 'bg-red-50 border-red-300 text-red-800'
-  };
-
-  const sizeStyles = {
-    sm: 'p-2 text-sm',
-    md: 'p-3 text-base',
-    lg: 'p-4 text-lg'
-  };
-
+export default function WeatherItem({ icon, label, value }: Props) {
   return (
-    <div 
-      className={`
-        flex justify-between w-100 items-center 
-        rounded-xl border-2 
-        transition-all duration-200 
-        hover:shadow-md hover:scale-[1.02]
-        ${variantStyles[variant]} 
-        ${sizeStyles[size]}
-      `}
-    >
-      {/* Lado esquerdo - Icone + Label */}
+    <div className="flex justify-between items-center rounded-xl border-2 border-sky-100 p-3 hover:shadow-md transition">
       <div className="flex items-center gap-3">
-        <span className="text-xl filter drop-shadow-sm">{icon}</span>
-        <span className="font-medium tracking-wide">{label}</span>
+        <div className="text-2xl">{icon}</div>
+        <div>
+          <div className="text-sm text-slate-500">{label}</div>
+        </div>
       </div>
-      
-      {/* Lado direito - Valor */}
       <div className="text-right">
-        <span className="font-bold tracking-tight">{value}</span>
+        <div className="font-bold text-slate-700">{value}</div>
       </div>
     </div>
   );

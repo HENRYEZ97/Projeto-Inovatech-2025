@@ -1,102 +1,86 @@
+// server.js
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
-import axios from "axios";
 import cors from "cors";
 
 const app = express();
 const server = createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
-app.use(cors());
 
-//cordenadas
-const locais = {
-  "São José Operário 2": { lat: -3.1019, lon: -60.0111 },
-  "Jorge Teixeira": { lat: -3.0853, lon: -59.9322 },
-  "Cidade Nova": { lat: -3.0278, lon: -59.9388 },
-  "Japiim": { lat: -3.1162, lon: -59.9725 },
+// middlewares
+app.use(cors());
+app.use(express.json());
+
+// manter apenas São José Operário 2
+const LOCAL = "São José Operário 2";
+
+let dadosClima = {
+  [LOCAL]: {
+    bairro: LOCAL,
+    temperatura: 0,
+    umidade: 0,
+    nivelAgua: 0, // em cm
+    status: "normal",
+  },
 };
 
-let dadosClima = {};
-
-for (const nome in locais) {
-  dadosClima[nome] = {
-    bairro: nome,
-    temperatura: 0,
-    condicao: "Carregando...",
-    chuva: "0%",
-    nivelAgua: "12.4m",
-    status: "normal",
-  };
+function calcularStatus(nivelCm) {
+  // ajuste conforme seu critério (valores em cm)
+  if (nivelCm >= 25) return "emergencia";
+  if (nivelCm >= 15) return "alerta";
+  return "normal";
 }
 
-// 🔹 Função para mapear o código do clima (Open-Meteo)
-function mapearCondicao(codigo) {
-  const map = {
-    0: "Céu limpo",
-    1: "Principalmente limpo",
-    2: "Parcialmente nublado",
-    3: "Nublado",
-    45: "Neblina",
-    51: "Chuvisco leve",
-    61: "Chuva leve",
-    63: "Chuva moderada",
-    65: "Chuva forte",
-    80: "Chuva leve de verão",
-    81: "Chuva moderada de verão",
-    82: "Chuva intensa de verão",
-    95: "Tempestade",
-    99: "Tempestade com granizo",
-  };
-  return map[codigo] || "Desconhecido";
-}
+// rota GET para debug/teste via navegador
+app.get("/api/clima", (req, res) => {
+  res.json(dadosClima);
+});
 
-// 🔹 Atualiza os dados de clima para todos os locais
-async function atualizarClima() {
-  for (const nome in locais) {
-    const { lat, lon } = locais[nome];
-    try {
-      const res = await axios.get(
-        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`
-      );
+// rota que ESP32 fará POST
+app.post("/api/atualizar", (req, res) => {
+  try {
+    const { temperatura, umidade, nivelAgua } = req.body;
 
-      const clima = res.data.current_weather;
-      const temperatura = clima.temperature;
-      const condicao = mapearCondicao(clima.weathercode);
-      const chuva = `${Math.floor(Math.random() * 100)}%`;
-      const nivelAgua = `${(Math.random() * 8 + 10).toFixed(1)}m`;
-
-      // Determina status com base em chuva e nível da água
-      let status = "normal";
-      const nivel = parseFloat(nivelAgua);
-      const chuvaNum = parseInt(chuva);
-      if (nivel > 13 || chuvaNum > 70) status = "alerta";
-      if (nivel > 14 || chuvaNum > 90) status = "emergencia";
-
-      dadosClima[nome] = {
-        bairro: nome,
-        temperatura,
-        condicao,
-        chuva,
-        nivelAgua,
-        status,
-      };
-    } catch (err) {
-      console.error("Erro ao atualizar clima:", err.message);
+    // nivelAgua pode vir como "12.3m" ou número
+    let nivel = 0;
+    if (typeof nivelAgua === "string") {
+      const num = parseFloat(nivelAgua.replace(/[^\d.,-]/g, "").replace(",", "."));
+      nivel = isNaN(num) ? 0 : num;
+    } else if (typeof nivelAgua === "number") {
+      nivel = nivelAgua;
     }
+
+    const tempNum = Number(temperatura) || 0;
+    const umidNum = Number(umidade) || 0;
+
+    dadosClima[LOCAL] = {
+      bairro: LOCAL,
+      temperatura: tempNum,
+      umidade: umidNum,
+      nivelAgua: parseFloat(nivel.toFixed(1)),
+      status: calcularStatus(nivel),
+    };
+
+    // emite para todos os clientes conectados via socket.io
+    io.emit("climaAtualizado", dadosClima);
+
+    console.log("✅ Dados recebidos:", dadosClima[LOCAL]);
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error("Erro ao processar /api/atualizar:", err);
+    return res.status(500).json({ ok: false, error: "server error" });
   }
+});
 
-  // 🔸 Envia os dados atualizados ao front-end
-  io.emit("climaAtualizado", dadosClima);
-  console.log("✅ Dados meteorológicos enviados:", new Date().toLocaleTimeString());
-}
+// socket.io — apenas log de conexões
+io.on("connection", (socket) => {
+  console.log("🔌 Cliente conectado:", socket.id);
+  // envia estado atual assim que conectam
+  socket.emit("climaAtualizado", dadosClima);
 
-// 🔁 Atualiza a cada 10 segundos
-setInterval(atualizarClima, 10000);
-atualizarClima();
-
-// 🔹 Endpoint REST (caso queira testar pelo navegador)
-app.get("/api/clima", (req, res) => res.json(dadosClima));
+  socket.on("disconnect", () => console.log("❌ Cliente desconectou:", socket.id));
+});
 
 const PORT = process.env.PORT || 4000;
-server.listen(PORT, () => console.log(`🌎 Servidor rodando em http://localhost:${PORT}`));
+server.listen(PORT, () => console.log(`🌎 Backend rodando em http://0.0.0.0:${PORT}`));
