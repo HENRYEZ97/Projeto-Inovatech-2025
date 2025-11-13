@@ -39,7 +39,7 @@ export default function WeatherInfo() {
         <div className="mt-6 space-y-3 w-100">
           <WeatherItem icon="🌡️" label="Temperatura" value={`${weatherData.temperatura.toFixed(1)}°C`} />
           <WeatherItem icon="💧" label="Umidade" value={`${weatherData.umidade.toFixed(1)}%`} />
-          <WeatherItem icon="🌊" label="Nível do rio" value={`${weatherData.nivelAgua.toFixed(1)} cm`} />
+          <WeatherItem icon="🌊" label="Qualidade do Ar" value={`${weatherData.nivelAgua.toFixed(1)} cm`} />
         </div>
 
         <div className="mt-6 pt-4 border-t border-gray-100 text-sm text-gray-500">
