@@ -3,11 +3,18 @@ import React, { useEffect, useState } from "react";
 import { useWeather } from "../WeatherContext";
 import StatusHeader from "./StatusHeader";
 import Metrics from "./Metrics";
-import ChartPlaceholder from "../ChartPlaceholder";
+import Chart from "../Chart";
 import { CloudRain } from "lucide-react";
+import { useRouter } from "next/navigation";
+
 
 export default function WeatherPanel() {
-  const { weatherData, isLoading, selectedLocation } = useWeather();
+  const { historico, weatherData, isLoading, selectedLocation } = useWeather();
+  const router = useRouter();
+  const abrirLogs = () => {
+  router.push("/Logs");
+};
+
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [elapsed, setElapsed] = useState<string>("agora");
 
@@ -52,7 +59,7 @@ export default function WeatherPanel() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto w-full">
+    <div className="max-w-6xl mx-auto w-full space-y-6">
       <div className="mb-6">
         <StatusHeader localidade={selectedLocation} statusLabel={statusLabel} statusClass={statusClass} />
       </div>
@@ -86,7 +93,8 @@ export default function WeatherPanel() {
           />
 
           <div>
-            <ChartPlaceholder />
+            <Chart data={historico} />
+
           </div>
         </div>
 
@@ -94,9 +102,10 @@ export default function WeatherPanel() {
           <div className="bg-slate-700 p-4 rounded-2xl shadow-md border border-slate-100 cursor-pointer">
             <h4 className="text-sm text-white mb-2">Ações Rápidas</h4>
             <div className="flex flex-col gap-3 bg-slate-700">
-              <button className="cursor-pointer w-full px-4 py-2 rounded-lg bg-primary text-white font-semibold hover:opacity-95 transition">Notificar Equipe (simulado)</button>
-              <button className="cursor-pointer w-full px-4 py-2 rounded-lg border border-slate-200 text-text hover:bg-cyan-300 transition bg-slate-50 text-slate-700">Ver Logs</button>
-              <button className="cursor-pointer w-full px-4 py-2 rounded-lg text-sm text-slate-500 bg-slate-50 hover:bg-cyan-300 text-slate-700">Configurar Alertas</button>
+              <button className="cursor-pointer w-full px-4 py-2 rounded-lg bg-primary text-white font-semibold hover:opacity-95 transition">Histórico da leitura (simulado)</button>
+              <button onClick={abrirLogs} className="cursor-pointer w-full px-4 py-2 rounded-lg border border-slate-200 text-slate-700 hover:bg-cyan-300 transition bg-slate-50 font-semibold">Ver Logs</button>
+
+              
             </div>
           </div>
 
@@ -109,10 +118,10 @@ export default function WeatherPanel() {
             </ul>
           </div>
         </aside>
-      </div>
+      </div><br />
 
-      <footer className="mt-8 text-center text-xs text-slate-900">
-        © {new Date().getFullYear()} HYDROSENSE — Monitoramento de bairros • Dados reais recebidos do ESP32
+      <footer className="mt-25 text-center text-xs text-slate-100">
+        © {new Date().getFullYear()} HYDROSENSE — Monitoramento de bairros - Todos os Direitos Reservados. 
       </footer>
     </div>
   );

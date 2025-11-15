@@ -11,8 +11,8 @@ export default function StatusHeader({ localidade, statusLabel, statusClass }: P
   return (
     <header className="w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
       <div>
-        <div className="text-sm text-slate-700">Localidade</div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-secondary text-slate-700">{localidade}</h1>
+        <div className="text-sm text-slate-100">Localidade</div>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-secondary text-slate-100">{localidade}</h1>
       </div>
 
       <div className="flex items-center gap-4">

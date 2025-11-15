@@ -15,11 +15,11 @@ export default function RootLayout({ children }: RootLayoutProps) {
 
   return (
     <html lang="pt-BR">
-      <body className="bg-gray-50 text-slate-800 min-h-screen overflow-x-hidden">
+      <body className="bg-slate-800 text-slate-800 min-h-screen overflow-x-hidden">
         <WeatherProvider>
           <Header onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
           <Sidebar open={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-          <main className="p-6 transition-all duration-300 bg-gray-50">
+          <main className="p-6 transition-all duration-300 bg-slate-800">
             {children}
           </main>
         </WeatherProvider>

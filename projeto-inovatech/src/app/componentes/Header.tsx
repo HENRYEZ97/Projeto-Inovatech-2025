@@ -8,7 +8,7 @@ interface HeaderProps {
 
 export default function Header({ onMenuClick }: HeaderProps) {
   return (
-    <header className="flex items-center justify-between bg-gradient-to-br from-sky-100 to-cyan-300 px-6 py-4 shadow-sm border-b border-gray-200">
+    <header className="flex items-center justify-between bg-gradient-to-br from-sky-100 to-cyan-200 px-6 py-4 shadow-sm border-b border-gray-200">
       <button onClick={onMenuClick} className="text-slate-600 hover:text-cyan-600 p-2 rounded-lg cursor-pointer">
         <Menu size={28} />
       </button>

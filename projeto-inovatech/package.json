@@ -20,6 +20,7 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-leaflet": "^5.0.0",
+    "recharts": "^3.4.1",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.7.5"
   },
