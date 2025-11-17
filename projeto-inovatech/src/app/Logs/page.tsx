@@ -4,7 +4,6 @@ import LogsHeader from "./componentes/LogsHeader";
 import LogsCharts from "./componentes/LogsCharts";
 import LogsTable from "./componentes/LogsTable";
 import NoDataMessage from "./componentes/NoDataMessage";
-
 import { useWeather } from "@/app/componentes/WeatherContext";
 
 export default function LogsPage() {

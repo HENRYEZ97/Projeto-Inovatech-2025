@@ -1,3 +1,5 @@
+"use client";
+
 export default function NoDataMessage() {
   return (
     <div className="text-center py-20 bg-[#111b22] border border-cyan-600/20 rounded-xl shadow">

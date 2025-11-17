@@ -7,13 +7,12 @@ import Chart from "../Chart";
 import { CloudRain } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-
 export default function WeatherPanel() {
   const { historico, weatherData, isLoading, selectedLocation } = useWeather();
   const router = useRouter();
   const abrirLogs = () => {
-  router.push("/Logs");
-};
+    router.push("/Logs");
+  };
 
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [elapsed, setElapsed] = useState<string>("agora");
@@ -66,7 +65,7 @@ export default function WeatherPanel() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 flex flex-col gap-6">
-          <div className=" cursor-pointer bg-gradient-to-br from-slate-900 to-cyan-50 p-6 rounded-2xl shadow-inner border border-slate-100">
+          <div className="cursor-pointer bg-gradient-to-br from-slate-900 to-cyan-50 p-6 rounded-2xl shadow-inner border border-slate-100">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-white rounded-xl shadow-sm">
@@ -94,7 +93,6 @@ export default function WeatherPanel() {
 
           <div>
             <Chart data={historico} />
-
           </div>
         </div>
 
@@ -102,23 +100,29 @@ export default function WeatherPanel() {
           <div className="bg-slate-700 p-4 rounded-2xl shadow-md border border-slate-100 cursor-pointer">
             <h4 className="text-sm text-white mb-2">Ações Rápidas</h4>
             <div className="flex flex-col gap-3 bg-slate-700">
-              <button className="cursor-pointer w-full px-4 py-2 rounded-lg bg-primary text-white font-semibold hover:opacity-95 transition">Histórico da leitura (simulado)</button>
-              <button onClick={abrirLogs} className="cursor-pointer w-full px-4 py-2 rounded-lg border border-slate-200 text-slate-700 hover:bg-cyan-300 transition bg-slate-50 font-semibold">Ver Logs</button>
-
-              
+              <button className="cursor-pointer w-full px-4 py-2 rounded-lg bg-primary text-white font-semibold hover:opacity-95 transition">
+                Histórico da leitura (simulado)
+              </button>
+              <button 
+                onClick={abrirLogs} 
+                className="cursor-pointer w-full px-4 py-2 rounded-lg border border-slate-200 text-slate-700 hover:bg-cyan-300 transition bg-slate-50 font-semibold"
+              >
+                Ver Logs
+              </button>
             </div>
           </div>
 
           <div className="bg-white p-4 rounded-2xl shadow-md border border-slate-100">
             <h4 className="text-sm text-slate-700 mb-2">Informações</h4>
             <ul className="text-sm text-slate-600 space-y-2">
-              <li>Localidade: <span className="font-medium text-text text-slate-700">São José Operário II</span></li>
+              {/* ✅ CORREÇÃO AQUI: De "Centro" fixo para selectedLocation dinâmico */}
+              <li>Localidade: <span className="font-medium text-text text-slate-700">{selectedLocation}</span></li>
               <li>Intervalo do ESP32: <span className="font-medium text-text text-slate-700">4s</span></li>
               <li>Status do backend: <span className="font-medium text-text text-slate-700">Conectado (socket)</span></li>
             </ul>
           </div>
         </aside>
-      </div><br />
+      </div>
 
       <footer className="mt-25 text-center text-xs text-slate-100">
         © {new Date().getFullYear()} HYDROSENSE — Monitoramento de bairros - Todos os Direitos Reservados. 

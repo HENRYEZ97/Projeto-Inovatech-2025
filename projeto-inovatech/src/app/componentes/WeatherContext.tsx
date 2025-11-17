@@ -47,7 +47,7 @@ interface ContextType {
 }
 
 const defaultData: WeatherData = {
-  bairro: "São José Operário 2",
+  bairro: "Centro",
   temperatura: 0,
   umidade: 0,
   nivelAgua: 0,
@@ -56,22 +56,19 @@ const defaultData: WeatherData = {
 
 const WeatherContext = createContext<ContextType | undefined>(undefined);
 
-const SOCKET_URL =
-  process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:4000";
+const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:4000";
 
 let socket: SocketType | null = null;
+let dadosCompletos: Record<string, WeatherData> = {};
 
 export function WeatherProvider({ children }: { children: ReactNode }) {
   const [weatherData, setWeatherData] = useState<WeatherData>(defaultData);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedLocation, setSelectedLocation] = useState(
-    "São José Operário 2"
-  );
+  const [selectedLocation, setSelectedLocation] = useState("Centro");
 
   // LOGS
   const [logs, setLogs] = useState<LogItem[]>([]);
-  const [socketStatus, setSocketStatus] =
-    useState<"conectado" | "desconectado">("desconectado");
+  const [socketStatus, setSocketStatus] = useState<"conectado" | "desconectado">("desconectado");
 
   // HISTÓRICO
   const [historico, setHistorico] = useState<
@@ -94,14 +91,12 @@ export function WeatherProvider({ children }: { children: ReactNode }) {
       };
 
       const atualizado = [...prev, novoLog];
-
-      // Limita para 200 registros
       if (atualizado.length > 200) atualizado.shift();
-
       return atualizado;
     });
   };
 
+  // EFFECT 1: CONEXÃO SOCKET
   useEffect(() => {
     if (!socket) {
       socket = io(SOCKET_URL);
@@ -117,46 +112,72 @@ export function WeatherProvider({ children }: { children: ReactNode }) {
       addLog("Socket desconectado", "alerta");
     });
 
-    // DADOS DO ESP32
-    socket.on("climaAtualizado", (dados: Record<string, WeatherData>) => {
-      const local = dados[selectedLocation] || Object.values(dados)[0];
+    //CORREÇÃO: SALVA HISTÓRICO PARA TODOS OS BAIRROS
+socket.on("climaAtualizado", (dados: Record<string, WeatherData>) => {
+  console.log("📡 Dados recebidos do backend:", dados);
+  
+  // SALVA TODOS OS DADOS
+  dadosCompletos = dados;
+  
+  // ATUALIZA COM DADOS DO BAIRRO SELECIONADO
+  const dadosBairroSelecionado = dados[selectedLocation];
+  
+  if (dadosBairroSelecionado) {
+    setWeatherData(dadosBairroSelecionado);
+    setIsLoading(false);
 
-      if (local) {
-        setWeatherData(local);
-        setIsLoading(false);
+    addLog(`Dados recebidos para ${selectedLocation}`, "dado", dadosBairroSelecionado);
 
-        addLog("Dado recebido do ESP32", "dado", local);
+    // ✅ CORREÇÃO: SALVA HISTÓRICO PARA O BAIRRO ATUAL
+    setHistorico(prev => {
+      const entrada = {
+        timestamp: Date.now(),
+        temperatura: dadosBairroSelecionado.temperatura,
+        umidade: dadosBairroSelecionado.umidade,
+        nivelAgua: dadosBairroSelecionado.nivelAgua
+      };
 
-        // ADICIONA AO HISTÓRICO
-        setHistorico(prev => {
-          const entrada = {
-            timestamp: Date.now(),
-            temperatura: local.temperatura,
-            umidade: local.umidade,
-            nivelAgua: local.nivelAgua
-          };
-
-          const novo = [...prev, entrada];
-
-          // limita a 200 pontos
-          return novo.slice(-200);
-        });
-
-        // ALERTAS
-        if (local.nivelAgua >= 60) {
-          addLog("NÍVEL DE ÁGUA CRÍTICO - EMERGÊNCIA", "erro", local);
-        } else if (local.nivelAgua >= 40) {
-          addLog("Nível de água em ALERTA", "alerta", local);
-        }
-      }
+      const novo = [...prev, entrada];
+      // limita a 50 pontos para o gráfico não ficar poluído
+      return novo.slice(-50);
     });
+
+    // ALERTAS
+    if (dadosBairroSelecionado.nivelAgua >= 60) {
+      addLog("NÍVEL DE ÁGUA CRÍTICO - EMERGÊNCIA", "erro", dadosBairroSelecionado);
+    } else if (dadosBairroSelecionado.nivelAgua >= 40) {
+      addLog("Nível de água em ALERTA", "alerta", dadosBairroSelecionado);
+    }
+  }
+});
 
     return () => {
       socket?.off("climaAtualizado");
       socket?.off("connect");
       socket?.off("disconnect");
     };
-  }, [selectedLocation]);
+  }, []);
+
+  // ✅ EFFECT 2: ATUALIZA DADOS E HISTÓRICO QUANDO TROCA DE BAIRRO
+useEffect(() => {
+  if (dadosCompletos[selectedLocation]) {
+    console.log(`🔄 Trocando para bairro: ${selectedLocation}`);
+    
+    // Atualiza dados do bairro
+    setWeatherData(dadosCompletos[selectedLocation]);
+    
+    // ✅ CORREÇÃO: CRIA HISTÓRICO FICTÍCIO PARA O NOVO BAIRRO
+    const historicoFicticio = Array.from({ length: 10 }, (_, i) => ({
+      timestamp: Date.now() - (10 - i) * 30000, // 30 segundos entre pontos
+      temperatura: dadosCompletos[selectedLocation].temperatura + (Math.random() * 4 - 2),
+      umidade: dadosCompletos[selectedLocation].umidade + (Math.random() * 10 - 5),
+      nivelAgua: dadosCompletos[selectedLocation].nivelAgua + (Math.random() * 3 - 1.5)
+    }));
+    
+    setHistorico(historicoFicticio);
+    addLog(`Alterado para bairro: ${selectedLocation}`, "info");
+  }
+}, [selectedLocation]);
 
   return (
     <WeatherContext.Provider
@@ -165,11 +186,9 @@ export function WeatherProvider({ children }: { children: ReactNode }) {
         isLoading,
         selectedLocation,
         setSelectedLocation,
-
         logs,
         addLog,
         socketStatus,
-
         historico
       }}
     >

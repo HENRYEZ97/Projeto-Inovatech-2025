@@ -1,4 +1,3 @@
-// components/Sidebar.tsx
 "use client";
 import { useWeather } from "./WeatherContext";
 
@@ -9,7 +8,7 @@ interface SidebarProps {
 
 export default function Sidebar({ open, onClose }: SidebarProps) {
   const { selectedLocation, setSelectedLocation } = useWeather();
-  const locais = ["São José Operário 2"];
+  const locais = ["Centro", "Cidade Nova", "Grande Vitória", "São José"];
 
   const handleLocationClick = (loc: string) => {
     setSelectedLocation(loc);
@@ -20,7 +19,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     <aside className={`bg-gradient-to-b from-sky-100 to-cyan-200 fixed top-0 left-0 h-full w-64 bg-white shadow-xl transform ${open ? "translate-x-0" : "-translate-x-full"} transition-transform duration-300 z-50`}>
       <div className="p-6 border-b bg-gradient-to-br from-sky-200 to-cyan-200 flex justify-between items-center">
         <h2 className="text-lg font-semibold text-slate-600">Localidades</h2>
-        <button onClick={onClose} className="text-black font-bold cursor-pointer hover:bg-blue-500 rounded-br-lg">×</button>
+        <button onClick={onClose} className="text-black font-bold cursor-pointer hover:bg-blue-500">×</button>
       </div>
       <ul className="p-4">
         {locais.map((local) => (
