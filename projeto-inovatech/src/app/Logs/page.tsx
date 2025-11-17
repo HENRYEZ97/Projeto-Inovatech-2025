@@ -25,6 +25,10 @@ export default function LogsPage() {
         )}
 
       </div>
+
+      <footer className="mt-30 text-center text-xs text-slate-100">
+        © {new Date().getFullYear()} HYDROSENSE — Monitoramento de bairros - Todos os Direitos Reservados. 
+      </footer>
     </div>
   );
 }
