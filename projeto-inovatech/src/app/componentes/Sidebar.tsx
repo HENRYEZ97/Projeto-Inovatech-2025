@@ -47,7 +47,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
             </div>
             <button 
               onClick={onClose}
-              className="p-1 hover:bg-white/10 rounded transition-colors duration-200"
+              className="cursor-pointer p-1 hover:bg-white/10 rounded transition-colors duration-200"
             >
               <X className="text-cyan-200 hover:text-white" size={20} />
             </button>
@@ -67,7 +67,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                 <button
                   onClick={() => handleLocationClick(local)}
                   className={`
-                    w-full text-left p-4 rounded-xl transition-all duration-300 
+                    cursor-pointer w-full text-left p-4 rounded-xl transition-all duration-300 
                     border border-white/10 backdrop-blur-sm
                     ${selectedLocation === local 
                       ? "bg-cyan-600/70 text-white shadow-lg border-cyan-400/50 scale-[1.02]" 
@@ -81,6 +81,8 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                       <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
                     )}
                   </div>
+
+                
                   <div className={`text-xs mt-1 ${selectedLocation === local ? 'text-cyan-100' : 'text-cyan-300/70'}`}>
                     {selectedLocation === local ? 'Monitorando...' : 'Clique para selecionar'}
                   </div>

@@ -101,13 +101,13 @@ export default function WeatherPanel() {
             <h4 className="text-sm text-white mb-2">Ações Rápidas</h4>
             <div className="flex flex-col gap-3 bg-slate-700">
               <button className="cursor-pointer w-full px-4 py-2 rounded-lg bg-primary text-white font-semibold hover:opacity-95 transition">
-                Histórico da leitura (simulado)
+                Histórico da leitura
               </button>
               <button 
                 onClick={abrirLogs} 
                 className="cursor-pointer w-full px-4 py-2 rounded-lg border border-slate-200 text-slate-700 hover:bg-cyan-300 transition bg-slate-50 font-semibold"
               >
-                Ver Logs
+                Ver Histórico
               </button>
             </div>
           </div>
@@ -118,7 +118,7 @@ export default function WeatherPanel() {
               {/* ✅ CORREÇÃO AQUI: De "Centro" fixo para selectedLocation dinâmico */}
               <li>Localidade: <span className="font-medium text-text text-slate-700">{selectedLocation}</span></li>
               <li>Intervalo do ESP32: <span className="font-medium text-text text-slate-700">4s</span></li>
-              <li>Status do backend: <span className="font-medium text-text text-slate-700">Conectado (socket)</span></li>
+              <li>Status: <span className="font-medium text-text text-slate-700">Conectado</span></li>
             </ul>
           </div>
         </aside>

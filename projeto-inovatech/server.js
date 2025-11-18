@@ -8,14 +8,14 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
-// middlewares
+//middlewares
 app.use(cors());
 app.use(express.json());
 
-// ==================== CONFIGURAÇÃO DOS BAIRROS ====================
+//Array dos dados
 const BAIRROS = ["Centro", "Cidade Nova", "Grande Vitória", "São José"];
 
-// Dados FIXOS para os bairros fictícios
+//Dados fictícios fixos para os bairros
 const DADOS_BAIRROS_FIXOS = {
   "Cidade Nova": { 
     bairro: "Cidade Nova", 
@@ -40,7 +40,7 @@ const DADOS_BAIRROS_FIXOS = {
   }
 };
 
-// Dados iniciais para TODOS os bairros
+//Dados iniciais para TODOS os bairros
 let dadosClima = {
   "Centro": { bairro: "Centro", temperatura: 0, umidade: 0, nivelAgua: 0, status: "normal" },
   "Cidade Nova": DADOS_BAIRROS_FIXOS["Cidade Nova"],
@@ -54,7 +54,7 @@ function calcularStatus(nivelCm) {
   return "normal";
 }
 
-// ==================== INICIALIZAR DADOS FIXOS ====================
+//Dados fixos
 function inicializarDadosFicticios() {
   // Aplica dados FIXOS aos bairros fictícios
   Object.keys(DADOS_BAIRROS_FIXOS).forEach(bairro => {
@@ -65,14 +65,13 @@ function inicializarDadosFicticios() {
   io.emit("climaAtualizado", dadosClima);
 }
 
-// ==================== ROTAS ====================
-
-// Rota GET para todos os bairros
+//Rotas
+//Rota get para todos os bairros
 app.get("/api/clima", (req, res) => {
   res.json(dadosClima);
 });
 
-// Rota GET específica por bairro
+//Rota get específica por bairro
 app.get("/api/clima/:bairro", (req, res) => {
   const { bairro } = req.params;
   if (dadosClima[bairro]) {
@@ -82,14 +81,14 @@ app.get("/api/clima/:bairro", (req, res) => {
   }
 });
 
-// Rota para atualizar dados do ESP32 (apenas Centro)
+//Rota para atualizar dados do ESP32 (apenas o bairro Centro)
 app.post("/api/atualizar", (req, res) => {
   try {
     const { temperatura, umidade, nivelAgua } = req.body;
 
     console.log("📨 Dados recebidos do ESP32:", { temperatura, umidade, nivelAgua });
 
-    // Processa nível da água
+    //Processamento do Nível da água
     let nivel = 0;
     if (typeof nivelAgua === "string") {
       const num = parseFloat(nivelAgua.replace(/[^\d.,-]/g, "").replace(",", "."));
@@ -101,7 +100,7 @@ app.post("/api/atualizar", (req, res) => {
     const tempNum = Number(temperatura) || 0;
     const umidNum = Number(umidade) || 0;
 
-    // DADOS REAIS - APENAS PARA O CENTRO
+    //Dados reais para o bairro Centro
     dadosClima["Centro"] = {
       bairro: "Centro",
       temperatura: tempNum,
@@ -112,7 +111,7 @@ app.post("/api/atualizar", (req, res) => {
 
     console.log("✅ Dados REAIS recebidos para Centro:", dadosClima["Centro"]);
     
-    // Emite atualização via socket
+    //Emite atualização via socket
     io.emit("climaAtualizado", dadosClima);
     
     return res.json({ 
@@ -127,7 +126,7 @@ app.post("/api/atualizar", (req, res) => {
   }
 });
 
-// ==================== SOCKET ====================
+//Socket
 io.on("connection", (socket) => {
   console.log("🔌 Cliente conectado:", socket.id);
   
@@ -139,9 +138,8 @@ io.on("connection", (socket) => {
   });
 });
 
-// ==================== INICIALIZAÇÃO ====================
 
-// Inicializa dados FIXOS
+//Inicialização dos bairros fixos
 inicializarDadosFicticios();
 
 const PORT = process.env.PORT || 4000;
