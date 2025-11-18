@@ -1,4 +1,4 @@
-// server.js - VERSÃO COMPLETA E CORRIGIDA
+// server.js - VERSÃO COM DADOS FIXOS
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
@@ -15,12 +15,37 @@ app.use(express.json());
 // ==================== CONFIGURAÇÃO DOS BAIRROS ====================
 const BAIRROS = ["Centro", "Cidade Nova", "Grande Vitória", "São José"];
 
+// Dados FIXOS para os bairros fictícios
+const DADOS_BAIRROS_FIXOS = {
+  "Cidade Nova": { 
+    bairro: "Cidade Nova", 
+    temperatura: 26.5, 
+    umidade: 65, 
+    nivelAgua: 8.7, 
+    status: "normal" 
+  },
+  "Grande Vitória": { 
+    bairro: "Grande Vitória", 
+    temperatura: 28.2, 
+    umidade: 70, 
+    nivelAgua: 22.1, 
+    status: "alerta" 
+  },
+  "São José": { 
+    bairro: "São José", 
+    temperatura: 26.9, 
+    umidade: 68, 
+    nivelAgua: 12.4, 
+    status: "normal" 
+  }
+};
+
 // Dados iniciais para TODOS os bairros
 let dadosClima = {
   "Centro": { bairro: "Centro", temperatura: 0, umidade: 0, nivelAgua: 0, status: "normal" },
-  "Cidade Nova": { bairro: "Cidade Nova", temperatura: 0, umidade: 0, nivelAgua: 0, status: "normal" },
-  "Grande Vitória": { bairro: "Grande Vitória", temperatura: 0, umidade: 0, nivelAgua: 0, status: "normal" },
-  "São José": { bairro: "São José", temperatura: 0, umidade: 0, nivelAgua: 0, status: "normal" }
+  "Cidade Nova": DADOS_BAIRROS_FIXOS["Cidade Nova"],
+  "Grande Vitória": DADOS_BAIRROS_FIXOS["Grande Vitória"],
+  "São José": DADOS_BAIRROS_FIXOS["São José"]
 };
 
 function calcularStatus(nivelCm) {
@@ -29,59 +54,14 @@ function calcularStatus(nivelCm) {
   return "normal";
 }
 
-// ==================== GERAR DADOS FICTÍCIOS INTELIGENTES ====================
-function gerarDadosFicticios() {
-  const agora = new Date();
-  const hora = agora.getHours();
-  
-  // Variação baseada na hora do dia (mais calor durante o dia)
-  const variacaoDiurna = Math.sin((hora - 6) * Math.PI / 12) * 4;
-  
-  // Padrões diferentes para cada bairro
-  const padroesBairros = {
-    "Cidade Nova": {
-      baseTemp: 26.5,
-      baseUmidade: 65,
-      baseNivel: 8.7,
-      variacaoTemp: 2,
-      variacaoNivel: 3
-    },
-    "Grande Vitória": {
-      baseTemp: 28.2,
-      baseUmidade: 70, 
-      baseNivel: 22.1,
-      variacaoTemp: 3,
-      variacaoNivel: 5
-    },
-    "São José": {
-      baseTemp: 26.9,
-      baseUmidade: 68,
-      baseNivel: 12.4,
-      variacaoTemp: 2.5,
-      variacaoNivel: 4
-    }
-  };
-
-  // Atualiza cada bairro (exceto Centro)
-  Object.keys(padroesBairros).forEach(bairro => {
-    const padrao = padroesBairros[bairro];
-    
-    const novaTemperatura = padrao.baseTemp + variacaoDiurna + (Math.random() * padrao.variacaoTemp - padrao.variacaoTemp/2);
-    const novaUmidade = padrao.baseUmidade + (Math.random() * 20 - 10);
-    const novoNivel = padrao.baseNivel + (Math.random() * padrao.variacaoNivel - padrao.variacaoNivel/2);
-    
-    dadosClima[bairro] = {
-      bairro: bairro,
-      temperatura: parseFloat(novaTemperatura.toFixed(1)),
-      umidade: parseFloat(novaUmidade.toFixed(1)),
-      nivelAgua: parseFloat(novoNivel.toFixed(1)),
-      status: calcularStatus(novoNivel)
-    };
+// ==================== INICIALIZAR DADOS FIXOS ====================
+function inicializarDadosFicticios() {
+  // Aplica dados FIXOS aos bairros fictícios
+  Object.keys(DADOS_BAIRROS_FIXOS).forEach(bairro => {
+    dadosClima[bairro] = DADOS_BAIRROS_FIXOS[bairro];
   });
-
-  console.log("🔄 Dados fictícios atualizados para:", Object.keys(padroesBairros).join(", "));
   
-  // 🔥🔥🔥 CORREÇÃO CRÍTICA: EMITE VIA SOCKET.IO SEMPRE QUE GERA DADOS
+  console.log("✅ Dados FIXOS aplicados para bairros fictícios");
   io.emit("climaAtualizado", dadosClima);
 }
 
@@ -102,7 +82,7 @@ app.get("/api/clima/:bairro", (req, res) => {
   }
 });
 
-// Rota que ESP32 fará POST - ATUALIZA APENAS O CENTRO
+// Rota para atualizar dados do ESP32 (apenas Centro)
 app.post("/api/atualizar", (req, res) => {
   try {
     const { temperatura, umidade, nivelAgua } = req.body;
@@ -121,7 +101,7 @@ app.post("/api/atualizar", (req, res) => {
     const tempNum = Number(temperatura) || 0;
     const umidNum = Number(umidade) || 0;
 
-    // ✅ DADOS REAIS - APENAS PARA O CENTRO
+    // DADOS REAIS - APENAS PARA O CENTRO
     dadosClima["Centro"] = {
       bairro: "Centro",
       temperatura: tempNum,
@@ -130,10 +110,11 @@ app.post("/api/atualizar", (req, res) => {
       status: calcularStatus(nivel),
     };
 
-    // 🔄 ATUALIZA DADOS FICTÍCIOS PARA OUTROS BAIRROS
-    gerarDadosFicticios();
-
     console.log("✅ Dados REAIS recebidos para Centro:", dadosClima["Centro"]);
+    
+    // Emite atualização via socket
+    io.emit("climaAtualizado", dadosClima);
+    
     return res.json({ 
       ok: true, 
       message: "Dados recebidos com sucesso",
@@ -146,7 +127,7 @@ app.post("/api/atualizar", (req, res) => {
   }
 });
 
-// ==================== SOCKET.IO ====================
+// ==================== SOCKET ====================
 io.on("connection", (socket) => {
   console.log("🔌 Cliente conectado:", socket.id);
   
@@ -154,23 +135,20 @@ io.on("connection", (socket) => {
   socket.emit("climaAtualizado", dadosClima);
 
   socket.on("disconnect", () => {
-    console.log("❌ Cliente desconectou:", socket.id);
+    console.log("Cliente desconectou:", socket.id);
   });
 });
 
 // ==================== INICIALIZAÇÃO ====================
 
-// Gera dados fictícios iniciais
-gerarDadosFicticios();
-
-// 🔥 ATUALIZA DADOS FICTÍCIOS AUTOMATICAMENTE A CADA 30 SEGUNDOS
-setInterval(gerarDadosFicticios, 30000);
+// Inicializa dados FIXOS
+inicializarDadosFicticios();
 
 const PORT = process.env.PORT || 4000;
 server.listen(PORT, () => {
   console.log(`🌎 Backend rodando em http://0.0.0.0:${PORT}`);
-  console.log(`📊 Bairros monitorados: ${BAIRROS.join(", ")}`);
-  console.log(`✅ Centro: Dados REAIS do ESP32`);
-  console.log(`🤖 Outros: Dados FICTÍCIOS inteligentes (atualizando a cada 30s)`);
-  console.log(`🚀 Sistema 100% funcional mesmo sem ESP32 conectado!`);
+  console.log(`Bairros monitorados: ${BAIRROS.join(", ")}`);
+  console.log(`Centro: Dados REAIS do ESP32`);
+  console.log(`Outros: Dados FIXOS (sem randomização)`);
+  console.log(`Sistema 100% funcional!`);
 });

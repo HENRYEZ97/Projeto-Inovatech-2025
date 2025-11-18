@@ -38,6 +38,7 @@ export default function Chart({ data }: Props) {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="timestamp" tickFormatter={formatTime} />
             <YAxis />
+
             <Tooltip labelFormatter={formatTime} />
 
             <Line type="monotone" dataKey="temperatura" stroke="#ff4d4f" name="Temperatura" />
