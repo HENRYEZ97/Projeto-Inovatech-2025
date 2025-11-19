@@ -1,4 +1,3 @@
-// server.js - VERSÃO COM DADOS FIXOS
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
@@ -40,7 +39,7 @@ const DADOS_BAIRROS_FIXOS = {
   }
 };
 
-//Dados iniciais para TODOS os bairros
+//Dados iniciais para todos os bairros
 let dadosClima = {
   "Centro": { bairro: "Centro", temperatura: 0, umidade: 0, nivelAgua: 0, status: "normal" },
   "Cidade Nova": DADOS_BAIRROS_FIXOS["Cidade Nova"],
@@ -61,7 +60,7 @@ function inicializarDadosFicticios() {
     dadosClima[bairro] = DADOS_BAIRROS_FIXOS[bairro];
   });
   
-  console.log("✅ Dados FIXOS aplicados para bairros fictícios");
+  console.log("Dados fixos aplicados para bairros fictícios");
   io.emit("climaAtualizado", dadosClima);
 }
 
@@ -109,7 +108,7 @@ app.post("/api/atualizar", (req, res) => {
       status: calcularStatus(nivel),
     };
 
-    console.log("✅ Dados REAIS recebidos para Centro:", dadosClima["Centro"]);
+    console.log("Dados reais recebidos para Centro:", dadosClima["Centro"]);
     
     //Emite atualização via socket
     io.emit("climaAtualizado", dadosClima);
@@ -121,7 +120,7 @@ app.post("/api/atualizar", (req, res) => {
     });
 
   } catch (err) {
-    console.error("❌ Erro ao processar /api/atualizar:", err);
+    console.error("Erro ao processar /api/atualizar:", err);
     return res.status(500).json({ ok: false, error: "server error" });
   }
 });
@@ -130,7 +129,7 @@ app.post("/api/atualizar", (req, res) => {
 io.on("connection", (socket) => {
   console.log("🔌 Cliente conectado:", socket.id);
   
-  // Envia dados de TODOS os bairros quando conecta
+  // Envia dados de todos os bairros quando conecta
   socket.emit("climaAtualizado", dadosClima);
 
   socket.on("disconnect", () => {
