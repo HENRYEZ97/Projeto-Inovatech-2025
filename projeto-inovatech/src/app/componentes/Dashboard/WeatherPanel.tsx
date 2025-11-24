@@ -68,7 +68,7 @@ export default function WeatherPanel() {
           <div className="cursor-pointer bg-gradient-to-br from-slate-900 to-cyan-50 p-6 rounded-2xl shadow-inner border border-slate-100">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-white rounded-xl shadow-sm">
+                <div className="p-3 bg-slate-500 rounded-xl shadow-sm">
                   <CloudRain className="text-secondary bg-slate-500" size={32} />
                 </div>
                 <div>
